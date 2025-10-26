@@ -1,0 +1,230 @@
+
+  /* ---------- Global Reset ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #959bef, #97bfff);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  color: #171616;
+}
+
+/* Page Title */
+h1 {
+  text-align: center;
+  color: #050210;
+  margin-bottom: 25px;
+  font-size: 2rem;
+  font-weight: 700;
+  text-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+/* ---------- Login Box ---------- */
+.login-container {
+  background: #fff;
+  width: 360px;
+  padding: 45px 35px;
+  border-radius: 18px;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin: auto;
+}
+.login-container:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+}
+.login-container h2 {
+  color: #222;
+  margin-bottom: 25px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.login-container input {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border-radius: 10px;
+  border: 1.5px solid #ddd;
+  font-size: 15px;
+  transition: 0.3s;
+  background: #fafafa;
+}
+.login-container input:focus {
+  border-color: #973ef5;
+  box-shadow: 0 0 10px rgba(106, 17, 203, 0.3);
+  outline: none;
+  background: #fff;
+}
+.login-container button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.login-container button:hover {
+  background: linear-gradient(135deg, #5310a8, #1f63d0);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+}
+
+/* ---------- Notes App ---------- */
+.app-container {
+  display: none;
+  width: 100%;
+  max-width: 1100px;
+  margin-top: 30px;
+}
+.container {
+  background: #ededf1;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Input fields inside notes app */
+.container input[type="text"],
+.container input[type="file"] {
+  padding: 12px 14px;
+  width: 100%;
+  border-radius: 8px;
+  border: 1.5px solid #ccc;
+  font-size: 15px;
+  transition: 0.3s;
+}
+.container input:focus {
+  border-color: #2575fc;
+  box-shadow: 0 0 8px rgba(37,117,252,0.25);
+  outline: none;
+  background: #fff;
+}
+
+/* Buttons */
+.container button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.container button:hover { opacity: 0.92; transform: translateY(-2px); }
+
+/* Notes Grid */
+#notesList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-auto-rows: min-content;
+  gap: 22px;
+  margin-top: 20px;
+}
+.note-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  word-wrap: break-word;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.note-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+.note-card h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+}
+.note-card img { 
+  max-width: 100%; 
+  border-radius: 8px; 
+}
+.file-preview {
+  border: 1px solid #ccc;
+  padding: 8px;
+  background: #fafafa;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.timestamp { font-size: 0.85em; color: #777; }
+
+/* Note Actions */
+.note-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+.note-actions button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+.view-btn { background: #3498db; }
+.download-btn { background: #27ae60; }
+.delete-btn { background: #e74c3c; }
+.view-btn:hover { background: #2c80b4; }
+.download-btn:hover { background: #1e8c50; }
+.delete-btn:hover { background: #c0392b; }
+
+/* ---------- Responsive ---------- */
+@media(max-width: 450px) {
+  .login-container { width: 92%; padding: 30px 22px; }
+  .app-container { padding: 0; }
+}
+
+
+  
+  /* Drag & Drop Zone */
+  #dropZone {
+    margin: 15px 0;
+    padding: 20px;
+    border: 2px dashed #8e44ad;
+    border-radius: 10px;
+    text-align: center;
+    color: #666;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  #dropZone.dragover {
+    background: rgba(142, 68, 173, 0.1);
+    border-color: #732d91;
+    color: #732d91;
+  }
+
+
+
+
+
+
+
+
+
+

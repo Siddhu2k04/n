@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure Notes App</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ---------- Login Page ---------- -->
+<div class="login-container" id="loginPage">
+  <h2>Welcome Back, Secret Agent 🕵️‍♂️</h2>
+  <input type="password" id="userId" placeholder="Enter your super-secret code" autocomplete="off" inputmode="numeric">
+  <button onclick="login()">Let Me In 🔐</button>
+  <p><br>
+    No secret code yet? <span class="link" onclick="showSignup()" style="color: blue; cursor: pointer;">Get One 🚀</span>
+  </p>
+</div>
+
+<!-- ---------- SignUp Page ---------- -->
+<div class="login-container" id="signupPage" style="display:none;">
+  <h2>Create Your Secret Identity 🧙‍♂️</h2>
+  <input type="password" id="signupId" placeholder="Make up a top-secret code" autocomplete="off" inputmode="numeric">
+  <button onclick="signup()">Join the Club 📝</button>
+  <p><br>
+    Already a member of the spy squad? <span class="link" onclick="showLogin()" style="color: blue; cursor: pointer;">Login Here 🔓</span>
+  </p>
+</div>
+<!-- ---------- Notes App ---------- -->
+<div class="app-container" id="appPage" style="display:none;">
+  <div class="container">
+    <h1>📝 Your Super-Secret Notes Vault</h1>
+    
+    <input type="text" id="title" placeholder="What's this masterpiece called? 🖌️">
+    
+    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png">
+    
+    <div id="dropZone">🪄 Drag & Drop your secrets here... or just click above 📁</div>
+    
+    <button onclick="addNote()" style="background:#8e44ad;color:white;">✨ Save My Genius ✨</button>
+    
+    <div id="notesList"></div>
+    
+    <button style="background:#e74c3c;color:white;margin-top:15px;" onclick="logout()">👋 Log Me Out (Peace!)</button>
+
+    <p style="text-align: center;">
+  © All rights reserved. Made with 🛠️ tech and ❤️ love by <strong>Siddhant</strong>
+</p>
+  </div>
+</div>
+
+
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const userInput = document.getElementById("userId");
+    const signupInput = document.getElementById("signupId");
+
+    userInput.setAttribute("readonly", true);
+    signupInput.setAttribute("readonly", true);
+
+    setTimeout(() => {
+      userInput.removeAttribute("readonly");
+      signupInput.removeAttribute("readonly");
+
+      userInput.value = "";
+      signupInput.value = "";
+    }, 50);
+  });
+</script>
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+import { 
+  getFirestore, collection, addDoc, doc, onSnapshot, serverTimestamp, 
+  query, orderBy, getDocs, where, deleteDoc 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+
+// --- Firebase Config ---
+const firebaseConfig = {
+  apiKey: "AIzaSyCfUr14eVNLosBl13GBMGJc_GnnC5eXdhw",
+  authDomain: "notes-1-71989.firebaseapp.com",
+  projectId: "notes-1-71989",
+  storageBucket: "notes-1-71989.appspot.com",
+  messagingSenderId: "43784830040",
+  appId: "1:43784830040:web:684eb93e1bbc0f34eade2d"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// --- UI Elements ---
+const loginPage = document.getElementById('loginPage');
+const signupPage = document.getElementById('signupPage');
+const appPage = document.getElementById('appPage');
+const fileInput = document.getElementById("fileInput");
+const dropZone = document.getElementById("dropZone");
+const notesList = document.getElementById("notesList");
+
+let uploadedFile = null;
+let currentUserId = null;
+
+// --- Drag & Drop ---
+fileInput.addEventListener("change", e => {
+  if (e.target.files.length > 0) {
+    uploadedFile = e.target.files[0];
+    dropZone.textContent = `Selected: ${uploadedFile.name}`;
+  }
+});
+dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("dragover"); });
+dropZone.addEventListener("dragleave", () => { dropZone.classList.remove("dragover"); });
+dropZone.addEventListener("drop", e => {
+  e.preventDefault(); dropZone.classList.remove("dragover");
+  if (e.dataTransfer.files.length > 0) {
+    uploadedFile = e.dataTransfer.files[0];
+    fileInput.files = e.dataTransfer.files;
+    dropZone.textContent = `Selected: ${uploadedFile.name}`;
+  }
+});
+
+// --- Show SignUp/Login ---
+window.showSignup = () => { loginPage.style.display='none'; signupPage.style.display='block'; }
+window.showLogin = () => { signupPage.style.display='none'; loginPage.style.display='block'; }
+
+// --- SignUp ---
+window.signup = async () => {
+  const userId = document.getElementById('signupId').value.trim();
+  if (!userId) return alert("🕵️‍♂️ You need a secret code to join the vault!");
+
+  const usersRef = collection(db, "users");
+  const q = query(usersRef, where("id", "==", userId));
+  const snap = await getDocs(q);
+  if (!snap.empty) return alert("🚫 That code is already taken! Try a more mysterious one.");
+
+  await addDoc(usersRef, { id: userId });
+  alert("✅ You're in! Now go login like a pro spy.");
+  showLogin();
+};
+
+// --- Login ---
+window.login = async () => {
+  const userId = document.getElementById('userId').value.trim();
+  if (!userId) return alert("🔐 Please enter your secret login code!");
+
+  const usersRef = collection(db, "users");
+  const q = query(usersRef, where("id", "==", userId));
+  const snap = await getDocs(q);
+  if (snap.empty) return alert("😬 That code doesn’t exist! Maybe sign up first?");
+
+  currentUserId = userId;
+  loginPage.style.display = 'none';
+  signupPage.style.display = 'none';
+  appPage.style.display = 'block';
+  loadNotes();
+
+  alert("🎉 Welcome to your super-secret notes vault!");
+};
+
+// --- Logout ---
+window.logout = () => {
+  currentUserId = null;
+  loginPage.style.display = 'block';
+  signupPage.style.display = 'none';
+  appPage.style.display = 'none';
+  notesList.innerHTML = "";
+
+  // Reset everything
+  document.getElementById("userId").value = "";
+  document.getElementById("signupId").value = "";
+  document.getElementById("title").value = "";
+  fileInput.value = "";
+  dropZone.textContent = "🪄 Drag & Drop your secrets here... or just click above 📁";
+  uploadedFile = null;
+
+  alert("👋 You’ve been logged out. Your secrets are safe... for now!");
+};
+
+
+window.addNote = async () => {
+  const title = document.getElementById("title").value.trim();
+  if (!currentUserId) return alert("Login first!"); // Always check login
+
+  if (uploadedFile) {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const base64File = reader.result;
+        const fileName = uploadedFile.name;
+        const fileType = uploadedFile.type;
+        await saveNote(title, base64File, fileName, fileType, currentUserId);
+      } catch (err) {
+        alert("File upload failed!"); // Alert only if saveNote fails
+        console.error(err);
+      }
+    };
+    reader.onerror = () => {
+      alert("File reading failed!"); // Alert if file cannot be read
+    };
+    reader.readAsDataURL(uploadedFile);
+  } else if (title) {
+    // Save note with only title (no file)
+    try {
+      await saveNote(title, null, null, null, currentUserId);
+    } catch (err) {
+      alert("Failed to save note!");
+      console.error(err);
+    }
+  } else {
+    // No title and no file, do nothing silently
+    return;
+  }
+};
+
+
+// --- Save Note ---
+async function saveNote(title, file, fileName, fileType, userId){
+  await addDoc(collection(db,"notes"),{
+    userId, title, file, fileName, fileType, createdAt: serverTimestamp()
+  });
+  document.getElementById("title").value="";
+  fileInput.value="";
+  dropZone.textContent="Drag & Drop files here or click above";
+  uploadedFile=null;
+}
+
+// --- Load Notes (Only Current User) ---
+function loadNotes(){
+  if(!currentUserId) return;
+  const q = query(collection(db,"notes"), orderBy("createdAt","desc"));
+  onSnapshot(q,snapshot=>{
+    notesList.innerHTML="";
+    snapshot.forEach(docItem=>{
+      const data = docItem.data();
+      if(data.userId !== currentUserId) return;
+
+      const card = document.createElement("div"); card.className="note-card";
+      if(data.title){ const titleEl=document.createElement("h4"); titleEl.textContent=data.title; card.appendChild(titleEl); }
+
+      const actions = document.createElement("div"); actions.className="note-actions";
+
+       if (data.file) {
+        const ext = data.fileType || "";
+        if (data.fileType.startsWith("image/")) {
+          const img = document.createElement("img");
+          img.src = data.file;
+          img.alt = data.title || "image";
+          card.appendChild(img);
+        } else if ([
+          "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "text/plain"
+          ].includes(ext)) {
+          const filePreview = document.createElement("div");
+          filePreview.className = "file-preview";
+          filePreview.textContent = `📄 ${data.fileName || "File"}`;
+          card.appendChild(filePreview);
+        }
+      }
+
+      
+      if(data.file){
+        const downloadBtn = document.createElement("button");
+        downloadBtn.textContent="Download"; downloadBtn.className="download-btn";
+        downloadBtn.onclick = ()=> { const a=document.createElement("a"); a.href=data.file; a.download=data.fileName||"download"; document.body.appendChild(a); a.click(); document.body.removeChild(a);}
+        actions.appendChild(downloadBtn);
+      }
+
+    const deleteBtn = document.createElement("button");
+deleteBtn.textContent = "Delete";
+deleteBtn.className = "delete-btn";
+deleteBtn.onclick = async () => {
+  if (confirm("Delete this note?")) {
+    await deleteDoc(doc(db, "notes", docItem.id));
+  }
+};
+actions.appendChild(deleteBtn);
+
+
+      card.appendChild(actions); notesList.appendChild(card);
+
+
+      
+
+       const timeEl = document.createElement("div");
+      timeEl.className = "timestamp";
+      timeEl.textContent = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString() : "";
+      card.appendChild(timeEl);
+
+      notesList.appendChild(card);
+
+    });
+  });
+}
+</script>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("userId").value = "";
+    document.getElementById("signupId").value = "";
+    document.getElementById("title").value = "";
+    document.getElementById("fileInput").value = "";
+    document.getElementById("dropZone").textContent = "Drag & Drop files here or click above";
+    uploadedFile = null;
+  });
+
+
+  window.showSignup = () => {
+  loginPage.style.display = 'none';
+  signupPage.style.display = 'block';
+  document.getElementById("signupId").value = "";
+};
+
+window.showLogin = () => {
+  signupPage.style.display = 'none';
+  loginPage.style.display = 'block';
+  document.getElementById("userId").value = "";
+};
+
+
+</script>
+
+
+
+     
+</body>
+
+
+</html>
